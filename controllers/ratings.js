@@ -1,112 +1,64 @@
 const Rating = require('../models/Rating');
 const CoWorkingSpace = require('../models/CoWorkingSpace');
 
-exports.addRating = async (req, res, next) => {
+// @desc    Rate a co-working space by ID
+// @route   PATCH /api/v1/coworkingspaces/:id/rate
+// @access  Private
+exports.rateCoWorkingSpace = async (req, res, next) => {
   try {
-    const { coWorkingSpaceId, score, comment } = req.body;
+    const { rating } = req.body;
+    
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, msg: 'Invalid rating' });
+    }
 
-    const coWorkingSpace = await CoWorkingSpace.findById(coWorkingSpaceId);
+    const coWorkingSpace = await CoWorkingSpace.findById(req.params.id);
     if (!coWorkingSpace) {
-      return res.status(404).json({ success: false, message: 'Co-Working Space not found' });
+      return res.status(404).json({ success: false, msg: 'Co-working space not found' });
     }
 
-    const existingRating = await Rating.findOne({
-      coWorkingSpace: coWorkingSpaceId,
-      user: req.user.id
-    });
-    if (existingRating) {
-      return res.status(400).json({ success: false, message: 'You have already rated this Co-Working Space' });
-    }
-
-    const rating = await Rating.create({
-      coWorkingSpace: coWorkingSpaceId,
-      user: req.user.id,
-      score,
-      comment
+    // save new rating record
+    await Rating.create({
+      coWorkingSpace: coWorkingSpace._id,
+      rating: rating,
+      user: req.user.id   // ถ้ามีระบบ auth เก็บ user id ด้วย
     });
 
-    res.status(201).json({
-      success: true,
-      data: rating
-    });
+    coWorkingSpace.rating = rating; // อัปเดต rating ล่าสุด (หรือไม่ทำก็ได้ถ้าเก็บแยก Rating)
+    await coWorkingSpace.save();
+
+    res.status(200).json({ success: true, data: coWorkingSpace });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, error: 'Server Error' });
+    res.status(500).json({ success: false, msg: 'Server Error' });
   }
 };
 
-
-exports.getAllRatings = async (req, res, next) => {
-  try {
-    const { coWorkingSpaceId } = req.params;
-
-    const ratings = await Rating.find({ coWorkingSpace: coWorkingSpaceId }).populate('user', 'name');
-
-    res.status(200).json({
-      success: true,
-      count: ratings.length,
-      data: ratings
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: 'Server Error' });
-  }
-};
-
+// @desc    Get average rating for a co-working space
+// @route   GET /api/v1/coworkingspaces/:id/average-rating
+// @access  Public
 exports.getAverageRating = async (req, res, next) => {
   try {
-    const { coWorkingSpaceId } = req.params;
+    const coworkingSpaceId = req.params.id;
 
-    const result = await Rating.aggregate([
-      { $match: { coWorkingSpace: require('mongoose').Types.ObjectId(coWorkingSpaceId) } },
-      {
-        $group: {
-          _id: '$coWorkingSpace',
-          averageRating: { $avg: '$score' },
-          totalRatings: { $sum: 1 }
-        }
-      }
-    ]);
-
-    if (result.length === 0) {
-      return res.status(200).json({ success: true, data: { averageRating: 0, totalRatings: 0 } });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: result[0]
+    // Find all reservations that have a rating
+    const reservations = await Reservation.find({
+      coWorkingSpace: coworkingSpaceId,
+      rating: { $ne: null }
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: 'Server Error' });
-  }
-};
 
-exports.updateRating = async (req, res, next) => {
-  try {
-    const { ratingId } = req.params;
-    const { score, comment } = req.body;
+    const count = reservations.length;
 
-    const rating = await Rating.findById(ratingId);
-
-    if (!rating) {
-      return res.status(404).json({ success: false, message: 'Rating not found' });
+    if (count === 0) {
+      return res.status(200).json({ success: true, data: { averageRating: 0, count: 0 } });
     }
 
-    if (rating.user.toString() !== req.user.id) {
-      return res.status(401).json({ success: false, message: 'Not authorized to update this rating' });
-    }
+    const totalRating = reservations.reduce((sum, reservation) => sum + reservation.rating, 0);
+    const averageRating = Number((totalRating / count).toFixed(2));
 
-    rating.score = score || rating.score;
-    rating.comment = comment || rating.comment;
-    await rating.save();
-
-    res.status(200).json({
-      success: true,
-      data: rating
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: 'Server Error' });
+    res.status(200).json({ success: true, data: { averageRating, count } });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 };

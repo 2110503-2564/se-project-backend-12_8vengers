@@ -5,8 +5,6 @@ const {
   addReservation,
   updateReservation,
   deleteReservation,
-  rateReservation,
-  getAverageRating // เพิ่มฟังก์ชันนี้เข้ามา
 } = require('../controllers/reservations');
 
 const router = express.Router({ mergeParams: true });
@@ -26,12 +24,5 @@ router.route('/:id')
   .get(protect, getReservation)
   .put(protect, authorize('admin', 'user'), updateReservation)
   .delete(protect, authorize('admin', 'user'), deleteReservation);
-
-router.route('/:id/rate')
-  .patch(protect, authorize('admin', 'user'), rateReservation);
-
-
-router.route('/average/:id').get(protect,authorize('admin', 'user'), getAverageRating); 
- 
 
 module.exports = router;

@@ -11,9 +11,9 @@ const RatingSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  score: {
+  rating: {
     type: Number,
-    required: true,
+    // required: true,
     min: 1,
     max: 5
   },
