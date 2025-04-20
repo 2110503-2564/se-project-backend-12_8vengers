@@ -135,4 +135,31 @@ exports.deleteReview = async (req, res, next) => {
   }
 };
 
+// @desc     Get Reviews by CoWorking Space ID
+// @route    GET /api/v1/reviews/coworking/:coWorkingSpaceId
+// @access   Private
+exports.getReviewsByCoWorkingSpace = async (req, res) => {
+  try {
+    const { coWorkingSpaceId } = req.params;
+
+    if (!coWorkingSpaceId) {
+      return res.status(400).json({ success: false, message: "coWorkingSpaceId is required" });
+    }
+
+    const reviews = await Review.find({
+      coWorkingSpaceId: new mongoose.Types.ObjectId(coWorkingSpaceId),
+    }).populate('user', 'name'); // Populate user name to show along with the review
+
+    if (reviews.length === 0) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    res.status(200).json({ success: true, data: reviews });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
 
