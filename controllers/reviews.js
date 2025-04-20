@@ -2,11 +2,11 @@ const Review = require('../models/Review');
 const mongoose = require('mongoose'); // เพิ่มถ้ายังไม่มี
 
 // @desc     Create Review
-// @route    POST /api/v1/reviews/:reservationId
+// @route    POST /api/v1/reviews/:coWorkingSpaceId
 // @access   Private
 exports.createReview = async (req, res, next) => {
-  const { comment, coWorkingSpaceId } = req.body;  // Now accepting coWorkingSpaceId from body
-  const { reservationId } = req.params;
+  const { comment  } = req.body;
+  const { coWorkingSpaceId } = req.params;
 
   if (!comment || comment.trim() === '') {
     return res.status(400).json({
@@ -15,16 +15,8 @@ exports.createReview = async (req, res, next) => {
     });
   }
 
-  if (!coWorkingSpaceId) {
-    return res.status(400).json({
-      success: false,
-      message: 'CoWorking Space ID is required.',
-    });
-  }
-
   try {
     const newReview = await Review.create({
-      reservationId,
       user: req.user.id,
       coWorkingSpaceId,
       comment,
@@ -45,18 +37,18 @@ exports.createReview = async (req, res, next) => {
 
 
 // @desc    Get Review by Reservation ID
-// @route   GET /api/v1/reviews/:reservationId
+// @route   GET /api/v1/reviews/:coWorkingSpaceId
 // @access  Private
 exports.getReview = async (req, res) => {
   try {
-    const { reservationId } = req.params;
+    const { coWorkingSpaceId } = req.params;
 
-    if (!reservationId) {
-      return res.status(400).json({ success: false, message: "reservationId is required" });
+    if (!coWorkingSpaceId) {
+      return res.status(400).json({ success: false, message: "coWorkingSpaceId is required" });
     }
 
     const review = await Review.find({
-      reservationId: new mongoose.Types.ObjectId(reservationId),
+      coWorkingSpaceId: new mongoose.Types.ObjectId(coWorkingSpaceId),
     });
 
     if (review.length === 0) {

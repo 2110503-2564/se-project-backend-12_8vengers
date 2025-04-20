@@ -8,12 +8,6 @@ const ReviewSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
-    // อ้างอิงถึงการจอง (เชื่อมกับ Reservation model)
-    reservationId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Reservation',
-      required: true
-    },
     coWorkingSpaceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'CoWorkingSpace',

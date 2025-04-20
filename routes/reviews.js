@@ -4,10 +4,10 @@ const { getReview, createReview, editReview, deleteReview, getReviewsByCoWorking
 const { protect } = require('../middleware/auth');
 
 // GET สำหรับดึงรีวิวโดยใช้ reservationId จาก params
-router.get('/:reservationId', protect, getReview);
+router.get('/:coWorkingSpaceId', protect, getReview);
 
 // POST สำหรับสร้างรีวิวใหม่
-router.post('/:reservationId', protect, createReview);
+router.post('/:coWorkingSpaceId', protect, createReview);
 
 // PUT สำหรับแก้ไขรีวิวที่มีอยู่
 router.put('/:reviewId', protect, editReview); // เดิมคือ reservationId
