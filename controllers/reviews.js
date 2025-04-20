@@ -49,6 +49,7 @@ exports.getReview = async (req, res) => {
 
     const review = await Review.find({
       coWorkingSpaceId: new mongoose.Types.ObjectId(coWorkingSpaceId),
+      user: req.user.id,
     });
 
     if (review.length === 0) {
