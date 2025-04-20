@@ -11,6 +11,20 @@ const reservationRouter = require('./reservations');
 const router = express.Router();
 const {protect, authorize} = require('../middleware/auth');
 
+
+const {
+    rateCoWorkingSpace,
+    getRatingStatus
+  } = require('../controllers/coWorkingSpaces');
+  
+  router
+    .route('/:id/rate')
+    .patch(protect, rateCoWorkingSpace);
+  
+  router
+    .route('/:id/rating-status')
+    .get(protect, getRatingStatus);
+
 //Re-route into other resource routers
 router.use('/:coWorkingSpaceId/reservations/', reservationRouter);
 

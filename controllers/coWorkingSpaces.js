@@ -136,3 +136,94 @@ exports.deleteCoWorkingSpace = async (req,res,next)=>{
     }
 };
 
+const Rating = require('../models/Rating');
+
+// PATCH /api/v1/coWorkingSpaces/:id/rate
+exports.rateCoWorkingSpace = async (req, res) => {
+  const coWorkingSpaceId = req.params.id;
+  const { rating } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const hasReservation = await Reservation.findOne({
+      user: userId,
+      coWorkingSpace: coWorkingSpaceId,
+    });
+
+    if (!hasReservation) {
+      return res.status(403).json({
+        success: false,
+        message: "You must reserve this space before rating.",
+      });
+    }
+
+    let ratingRecord = await Rating.findOne({
+      user: userId,
+      coWorkingSpace: coWorkingSpaceId,
+    });
+
+    if (ratingRecord) {
+      ratingRecord.rating = rating;
+      await ratingRecord.save();
+    } else {
+      ratingRecord = await Rating.create({
+        user: userId,
+        coWorkingSpace: coWorkingSpaceId,
+        rating,
+      });
+    }
+
+    const allRatings = await Rating.find({ coWorkingSpace: coWorkingSpaceId });
+    const averageRating =
+      allRatings.reduce((sum, r) => sum + r.rating, 0) / allRatings.length;
+
+    await CoWorkingSpace.findByIdAndUpdate(coWorkingSpaceId, {
+      averageRating,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Rating submitted",
+      rating,
+    });
+  } catch (error) {
+    console.error("Rating error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error });
+  }
+};
+
+
+// GET /api/v1/coWorkingSpaces/:id/rating-status
+exports.getRatingStatus = async (req, res) => {
+    const coWorkingSpaceId = req.params.id;
+    const userId = req.user.id;
+  
+    try {
+      const hasReservation = await Reservation.findOne({
+        user: userId,
+        coWorkingSpace: coWorkingSpaceId,
+      });
+  
+      if (!hasReservation) {
+        return res.status(200).json({ hasReserved: false });
+      }
+  
+      const ratingRecord = await Rating.findOne({
+        user: userId,
+        coWorkingSpace: coWorkingSpaceId,
+      });
+  
+      res.status(200).json({
+        hasReserved: true,
+        rating: ratingRecord ? ratingRecord.rating : null,
+      });
+    } catch (error) {
+      console.error("Rating status error:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Server error" });
+    }
+  };
+  
