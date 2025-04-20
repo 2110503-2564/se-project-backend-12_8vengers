@@ -1,7 +1,7 @@
 const Review = require('../models/Review');
 const mongoose = require('mongoose'); // เพิ่มถ้ายังไม่มี
 
-// @desc     Create or Update Review
+// @desc     Create Review
 // @route    POST /api/v1/reviews/:reservationId
 // @access   Private
 exports.createReview = async (req, res, next) => {
@@ -45,7 +45,7 @@ exports.createReview = async (req, res, next) => {
 
 
 // @desc    Get Review by Reservation ID
-// @route   GET /api/v1/reviews/rid
+// @route   GET /api/v1/reviews/:reservationId
 // @access  Private
 exports.getReview = async (req, res) => {
   try {
@@ -72,7 +72,7 @@ exports.getReview = async (req, res) => {
 
 
 // @desc     Edit Review
-// @route    PUT /api/v1/reviews/:reservationId
+// @route    PUT /api/v1/reviews/:reviewId
 // @access   Private
 exports.editReview = async (req, res) => {
   const { comment } = req.body;
@@ -100,4 +100,39 @@ exports.editReview = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+// @desc     Delete Review
+// @route    DELETE /api/v1/reviews/:reservationId
+// @access   Private
+exports.deleteReview = async (req, res, next) => {
+  const { reviewId } = req.params;
+
+  try {
+    const review = await Review.findOne({
+      _id: new mongoose.Types.ObjectId(reviewId),
+      user: req.user.id,
+    });
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: 'Review not found',
+      });
+    }
+
+    await review.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Review deleted successfully.',
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error',
+    });
+  }
+};
+
 
