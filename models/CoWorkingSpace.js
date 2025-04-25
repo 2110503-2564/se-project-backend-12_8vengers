@@ -30,6 +30,14 @@ const CoWorkingSpaceSchema = new mongoose.Schema({
             /^(?:[01]\d|2[0-3]):[0-5]\d$/,
             'Please add a vaild time'
         ]
+    },
+    price:{
+        type:String,
+        require:[true,'Please add a price']
+    },
+    desc:{
+        type:String,
+        require:[true,'Please add description']
     }
 },{
     toJSON: {virtuals:true},
