@@ -23,6 +23,7 @@ const reservations = require('./routes/reservations');
 const reviews = require('./routes/reviews');
 const ratings = require('./routes/ratings');
 const payment = require('./routes/payment');
+const topupHistory = require('./routes/topupHistory');
 
   const app = express();
 
@@ -55,8 +56,9 @@ app.use(cors());
   app.use('/api/v1/reviews', reviews);
   app.use('/api/v1/ratings', ratings);
   app.use('/api/v1/payment', protect, payment);
+  app.use('/api/v1/topupHistory', protect, topupHistory);
 
-  const PORT = process.env.PORT || 5003;
+  const PORT = process.env.PORT || 5000;
 
   const server = app.listen(PORT,console.log('Server running in', process.env.NODE_ENV, 'on '+ process.env.HOST + ":" + PORT));
 
