@@ -1,5 +1,6 @@
 const Reservation = require('../models/Reservation');
 const CoWorkingSpace = require('../models/CoWorkingSpace');
+const User = require('../models/User');
 
 //@desc     Get All reservations
 //@route    GET /api/v1/reservations
@@ -100,6 +101,21 @@ exports.addReservation = async(req,res,next)=>{
         if(existedReservation.length >= 3 && req.user.role !== 'admin'){
             return res.status(400).json({success:false,message:`The user with ID ${req.user.id} has already made 3 reservations`});
         }
+
+         // **หา User ก่อนเพื่อตรวจ balance**
+         const user = await User.findById(req.user.id);
+         if (!user) {
+             return res.status(404).json({ success: false, message: "User not found" });
+         }
+ 
+         // เช็กว่ามี balance พอไหม
+         if (user.balance < coWorkingSpace.price) {
+             return res.status(400).json({ success: false, message: "Insufficient balance, please top-up" });
+         }
+ 
+         // หัก balance
+         user.balance -= coWorkingSpace.price;
+         await user.save(); // Save balance ใหม่ใน database
 
         const reservation = await Reservation.create(req.body);
         res.status(201).json({
