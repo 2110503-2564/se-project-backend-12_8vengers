@@ -19,6 +19,14 @@ const ReservationSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    cancellationDeadline: {
+        type: Date, // เก็บวันที่เวลาที่สามารถยกเลิกการจองได้
+        required: true,
+        default: function () {
+            const reservationDate = this.reserveDate;
+            return new Date(reservationDate.getTime() + 24 * 60 * 60 * 1000); // 24 ชั่วโมงหลังจากที่จอง
+        }
+    }
     // rating: {
     //     type: Number,
     //     min: 1,

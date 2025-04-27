@@ -34,6 +34,7 @@
     "cookie-parser": "^1.4.7",
     "cookie-signature": "^1.0.6",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
     "debug": "^2.6.9",
     "depd": "^2.0.0",
     "destroy": "^1.2.0",
