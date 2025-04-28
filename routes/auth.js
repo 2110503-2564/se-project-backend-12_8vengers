@@ -26,6 +26,7 @@ const router = express.Router();
  */
 
 /**
+/**
  * @swagger
  * /api/v1/auth/register:
  *   post:
@@ -37,19 +38,28 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - tel
+ *               - email
+ *               - password
  *             properties:
  *               name:
  *                 type: string
- *                 example: John Doe
+ *                 example: "Phrim"
+ *               tel:
+ *                 type: string
+ *                 example: "0123456789"
  *               email:
  *                 type: string
- *                 example: john@example.com
+ *                 example: "phrim@gmail.com"
  *               password:
  *                 type: string
- *                 example: password123
- *     responses:
- *       201:
- *         description: User registered successfully
+ *                 example: "12345678"
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin]
+ *                 default: user
  */
 
 /**
@@ -67,10 +77,10 @@ const router = express.Router();
  *             properties:
  *               email:
  *                 type: string
- *                 example: john@example.com
+ *                 example: phrim@gmail.com
  *               password:
  *                 type: string
- *                 example: password123
+ *                 example: 12345678
  *     responses:
  *       200:
  *         description: User logged in successfully
