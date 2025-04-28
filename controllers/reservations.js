@@ -183,9 +183,11 @@ exports.deleteReservation = async (req, res, next) => {
 
     // เช็กว่าเป็นวันที่จองในวันนี้หรือไม่
     if (reserveDate.isSame(currentDate, 'day')) {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot refund or cancel on the same day as the reservation"
+      // ถ้าเป็นวันเดียวกับที่จองก็สามารถยกเลิกได้ แต่ไม่คืนเงิน
+      await reservation.deleteOne();  // ลบการจอง
+      return res.status(200).json({
+        success: true,
+        message: "Reservation canceled successfully, no refund provided"
       });
     }
 
@@ -233,5 +235,6 @@ exports.deleteReservation = async (req, res, next) => {
     return res.status(500).json({ success: false, message: 'Could not cancel the reservation' });
   }
 };
+
   
 
