@@ -40,27 +40,31 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - name
- *               - tel
  *               - email
  *               - password
+ *               - tel
  *             properties:
  *               name:
  *                 type: string
  *                 example: "Phrim"
- *               tel:
- *                 type: string
- *                 example: "0123456789"
  *               email:
  *                 type: string
  *                 example: "phrim@gmail.com"
  *               password:
  *                 type: string
  *                 example: "12345678"
- *               role:
+ *               tel:
  *                 type: string
- *                 enum: [user, admin]
- *                 default: user
+ *                 example: "0123456789"
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  */
+
 
 /**
  * @swagger
@@ -96,8 +100,13 @@ const router = express.Router();
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Successfully fetched user profile
+ *         description: Get current logged-in user's profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  */
+
 
 /**
  * @swagger
