@@ -13,58 +13,67 @@ dayjs.extend(timezone);
 //@route    GET /api/v1/reservations
 //@access   Private
 exports.getReservations = async (req, res, next) => {
-    let query;
-    
-    // General user can only see their reservations!
-    if (req.user.role !== 'admin') {
-      query = Reservation.find({ user: req.user.id })
-        .populate({
-          path: 'coWorkingSpace',
-          select: 'name address tel',
-        })
-        .populate({
-          path: 'user',  // Populate the user field
-          select: 'name email', // Adjust the fields you need
-        });
-    } else {
-      // If you're an admin, you can see all reservations
-      if (req.params.coWorkingSpaceId) {
-        console.log(req.params.coWorkingSpaceId);
-        query = Reservation.find({ coWorkingSpace: req.params.coWorkingSpaceId })
-          .populate({
-            path: 'coWorkingSpace',
-            select: 'name address tel',
+  let query;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // เซ็ตเวลาเป็นเที่ยงคืนของวันนี้เพื่อความแม่นยำ
+
+  try {
+      if (req.user.role !== 'admin') {
+          query = Reservation.find({ 
+              user: req.user.id,
+              reserveDate: { $gte: today } // เฉพาะจองที่ยังไม่ผ่านไป
           })
           .populate({
-            path: 'user',  // Populate the user field for admin
-            select: 'name email',
+              path: 'coWorkingSpace',
+              select: 'name address tel',
+          })
+          .populate({
+              path: 'user',
+              select: 'name email',
           });
       } else {
-        query = Reservation.find()
-          .populate({
-            path: 'coWorkingSpace',
-            select: 'name address tel',
-          })
-          .populate({
-            path: 'user',  // Populate the user field for all reservations
-            select: 'name email',
-          });
+          if (req.params.coWorkingSpaceId) {
+              query = Reservation.find({ 
+                  coWorkingSpace: req.params.coWorkingSpaceId,
+                  reserveDate: { $gte: today }
+              })
+              .populate({
+                  path: 'coWorkingSpace',
+                  select: 'name address tel',
+              })
+              .populate({
+                  path: 'user',
+                  select: 'name email',
+              });
+          } else {
+              query = Reservation.find({ 
+                  reserveDate: { $gte: today }
+              })
+              .populate({
+                  path: 'coWorkingSpace',
+                  select: 'name address tel',
+              })
+              .populate({
+                  path: 'user',
+                  select: 'name email',
+              });
+          }
       }
-    }
-  
-    try {
+
       const reservations = await query;
-  
+
       res.status(200).json({
-        success: true,
-        count: reservations.length,
-        data: reservations,
+          success: true,
+          count: reservations.length,
+          data: reservations,
       });
-    } catch (error) {
+  } catch (error) {
       console.log(error);
       return res.status(500).json({ success: false, message: 'Cannot find Reservations' });
-    }
-  };
+  }
+};
+
 
 //@desc     Get single reservation
 //@route    GET /api/v1/reservations/:id
@@ -103,11 +112,11 @@ exports.addReservation = async(req,res,next)=>{
         req.body.user = req.user.id;
 
         //Check for existed reservation
-        const existedReservation = await Reservation.find({user:req.user.id});
-        //If the user is not an admin, they can only create 3 reservation.
-        if(existedReservation.length >= 3 && req.user.role !== 'admin'){
-            return res.status(400).json({success:false,message:`The user with ID ${req.user.id} has already made 3 reservations`});
-        }
+        // const existedReservation = await Reservation.find({user:req.user.id});
+        // //If the user is not an admin, they can only create 3 reservation.
+        // if(existedReservation.length >= 3 && req.user.role !== 'admin'){
+        //     return res.status(400).json({success:false,message:`The user with ID ${req.user.id} has already made 3 reservations`});
+        // }
 
          // **หา User ก่อนเพื่อตรวจ balance**
          const user = await User.findById(req.user.id);
