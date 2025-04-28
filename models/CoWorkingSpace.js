@@ -32,7 +32,7 @@ const CoWorkingSpaceSchema = new mongoose.Schema({
         ]
     },
     price:{
-        type:String,
+        type:Number,
         require:[true,'Please add a price']
     },
     desc:{
