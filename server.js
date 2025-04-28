@@ -24,6 +24,7 @@ const reviews = require('./routes/reviews');
 const ratings = require('./routes/ratings');
 const payment = require('./routes/payment');
 const topupHistory = require('./routes/topupHistory');
+const transactions = require('./routes/transactions');
 
   const app = express();
 
@@ -57,6 +58,7 @@ app.use(cors());
   app.use('/api/v1/ratings', ratings);
   app.use('/api/v1/payment', protect, payment);
   app.use('/api/v1/topupHistory', protect, topupHistory);
+  app.use('/api/v1/transactions',protect ,transactions);
 
   const PORT = process.env.PORT || 5003;
 
