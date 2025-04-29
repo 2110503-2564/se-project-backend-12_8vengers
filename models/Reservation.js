@@ -27,12 +27,7 @@ const ReservationSchema = new mongoose.Schema({
             return new Date(reservationDate.getTime() + 24 * 60 * 60 * 1000); // 24 ชั่วโมงหลังจากที่จอง
         }
     }
-    // rating: {
-    //     type: Number,
-    //     min: 1,
-    //     max: 5,
-    //     default: null
-    //   }
+    
 });
 
 module.exports = mongoose.model('Reservation',ReservationSchema);
