@@ -69,3 +69,8 @@ app.use(cors());
     //Close server & exit process
     server.close(()=>process.exit(1));
   });
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
