@@ -72,13 +72,17 @@ exports.login= async (req,res,next)=>{
 //@desc     Get current Logged in user
 //@route    POST api/v1/auth/me
 //@access   Private
-exports.getMe = async(req,res,next)=>{
-        const user = await User.findById(req.user.id);
-        res.status(200).json({
-        success:true,
-        data:user
-        });
-};
+exports.getMe = async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id).select('-password');
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      res.status(200).json({ success: true, data: user });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Server Error' });
+    }
+  };
 
 //@desc     Log user out / clear cookie
 //@route    GET /api/v1/auth/logout
